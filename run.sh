@@ -18,3 +18,5 @@ docker build --no-cache --build-arg IMAGE_VERSION="1.0" --build-arg IMAGE_CREATE
 
 # Example 1 - Set config values via environment variables
 docker run --network docker0 -d -p 8080:80 --name poi -e "SQL_PASSWORD=P@ssw0rd" -e "SQL_SERVER=sql1" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
+
+az aks get-credentials --resource-group TripInsights --name kluster

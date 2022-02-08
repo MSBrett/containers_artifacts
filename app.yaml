@@ -1,0 +1,325 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poi
+  template:
+    metadata:
+      labels:
+        app: poi
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: poi
+        image: registrybpx4479.azurecr.io/poi:1.0
+        env:
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: username
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: password
+        - name: SQL_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_SERVER
+        - name: SQL_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_DBNAME
+        - name: WEB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: WEB_PORT
+        - name: WEB_SERVER_BASE_URI
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: WEB_SERVER_BASE_URI
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: ASPNETCORE_ENVIRONMENT
+        - name: CONFIG_FILES_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: CONFIG_FILES_PATH
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        ports:
+        - containerPort: 80
+          name: poi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trips
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trips
+  template:
+    metadata:
+      labels:
+        app: trips
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: trips
+        image: registrybpx4479.azurecr.io/trips:1.0
+        env:
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: username
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: password
+        - name: SQL_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_SERVER
+        - name: SQL_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_DBNAME
+        - name: CONFIG_FILES_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: CONFIG_FILES_PATH
+        - name: OPENAPI_DOCS_URI
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: OPENAPI_DOCS_URI
+        - name: DEBUG_LOGGING
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: DEBUG_LOGGING
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        ports:
+        - containerPort: 80
+          name: trips
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripviewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripviewer
+  template:
+    metadata:
+      labels:
+        app: tripviewer
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: tripviewer
+        image: registrybpx4479.azurecr.io/tripviewer:1.0
+        env:
+        - name: TRIPS_API_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: TRIPS_API_ENDPOINT
+        - name: USERPROFILE_API_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: USERPROFILE_API_ENDPOINT
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        ports:
+        - containerPort: 80
+          name: tripviewer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-java
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-java
+  template:
+    metadata:
+      labels:
+        app: user-java
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: user-java
+        image: registrybpx4479.azurecr.io/user-java:1.0
+        env:
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: username
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: password
+        - name: SQL_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_SERVER
+        - name: SQL_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_DBNAME
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        ports:
+        - containerPort: 80
+          name: user-java
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userprofile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userprofile
+  template:
+    metadata:
+      labels:
+        app: userprofile
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: trips
+        image: registrybpx4479.azurecr.io/userprofile:1.0
+        env:
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: username
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-sql-auth
+              key: password
+        - name: SQL_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_SERVER
+        - name: SQL_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: SQL_DBNAME
+        - name: CONFIG_FILES_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: tripviewer-config-map
+              key: CONFIG_FILES_PATH
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        ports:
+        - containerPort: 80
+          name: userprofile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poi
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: poi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trips
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: trips
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-java
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: user-java
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userprofile
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: userprofile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripviewer
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: tripviewer
